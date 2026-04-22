@@ -6,7 +6,8 @@ options = VarParsing('analysis')
 
 options.outputFile = 'output.root'
 # options.inputFiles = '/store/cmst3/group/vhcc/sfTuples/H3ToHHToWHorZH_HToAA_MX-Var_MH-15to650/20UL17MiniAODv2/miniv2_65373-4.root' ## H->WH/ZH->aaxx
-options.inputFiles = 'file:/afs/cern.ch/user/c/coli/miniv6.root'
+# options.inputFiles = 'file:/afs/cern.ch/user/c/coli/miniv6.root'
+options.inputFiles = 'file:/uscms_data/d3/oponcet1/VBS/VBS_WPolarization/WPolarisation_test/datasets/MiniAOD/VBSWTWTToJets_5f_LO_FXFX_Boost_1_Run3Summer23wmLHEGS_0_miniAOD.root'
 
 options.maxEvents = -1
 

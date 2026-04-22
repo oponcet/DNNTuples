@@ -52,3 +52,26 @@ More options of this `crab.py` script can be found with:
 ```bash
 ./crab.py -h
 ``` -->
+
+## DeepNtuplizerAK8RePuppi — Summary
+
+- Reads **MiniAOD** and processes **AK8 jets (R = 0.8)**
+- Recomputes **PUPPI weights** and **reclusters jets + MET**
+- Uses updated **PF candidates (`packedPFCandidatesRePuppi`)** as ML inputs
+- *(Optional)* runs **advanced jet taggers** (ParticleNet, Transformer, etc.)
+- Builds **gen-level AK8 jets** (with/without neutrinos, with SoftDrop)
+- Performs **reco–gen matching** (ΔR = 0.8) for truth association
+- Produces a **flat ROOT ntuple** via `DeepNtuplizer`
+
+### Ntuple content
+
+- Jet kinematics and substructure
+- Tagger scores (ParticleNet, GlobalParticleTransformer, etc.)
+- PF candidate low-level features *(optional)*
+- Matched gen-jet information
+
+### Usage
+
+- Designed for **deep learning training/inference**
+- Optimized for **boosted object tagging** (W/Z/H/top)
+- Runs **interactively on a single MiniAOD file**
