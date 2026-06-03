@@ -50,6 +50,9 @@ private:
   bool sample_use_herwig_ = false;
   bool sample_use_madgraph_ = false;
 
+  bool sample_isWT_ = false;
+  bool sample_isWL_ = false;
+
   std::string fjTagInfoName;
   std::string fjName;
 

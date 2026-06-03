@@ -16,6 +16,8 @@ void JetInfoFiller::readConfig(const edm::ParameterSet& iConfig, edm::ConsumesCo
   minPt_ = iConfig.getUntrackedParameter<double>("jetPtMin", 150);
   maxPt_ = iConfig.getUntrackedParameter<double>("jetPtMax", -1);
   maxAbsEta_ = iConfig.getUntrackedParameter<double>("jetAbsEtaMax", 2.4);
+  sample_isWT_ = iConfig.getUntrackedParameter<bool>("sample_isWT", false);
+  sample_isWL_ = iConfig.getUntrackedParameter<bool>("sample_isWL", false);
   isQCDSample_ = iConfig.getUntrackedParameter<bool>("isQCDSample", false);
   isTTBarSample_ = iConfig.getUntrackedParameter<bool>("isTTBarSample", false);
   isTrainSample_ = iConfig.getUntrackedParameter<bool>("isTrainSample", false);
@@ -83,16 +85,16 @@ bool JetInfoFiller::fill(const pat::Jet& jet, size_t jetidx, const JetHelper& je
   data.fill<float>("gen_pt", gen_pt);
   data.fill<float>("Delta_gen_pt", gen_pt - jet.correctedJet("Uncorrected").pt());
 
-  auto flavor = flavorDef.jet_flavour(jet);
-  data.fill<int>("isB", flavor==JetFlavor::B);
-  data.fill<int>("isBB", flavor==JetFlavor::BB);
-  data.fill<int>("isLeptonicB", flavor==JetFlavor::LeptonicB);
-  data.fill<int>("isLeptonicB_C", flavor==JetFlavor::LeptonicB_C);
-  data.fill<int>("isC", flavor==JetFlavor::C);
-  data.fill<int>("isUD", flavor==JetFlavor::UD);
-  data.fill<int>("isS", flavor==JetFlavor::S);
-  data.fill<int>("isG", flavor==JetFlavor::G);
-  data.fill<int>("isUndefined", flavor==JetFlavor::UNDEFINED);
+  // auto flavor = flavorDef.jet_flavour(jet);
+  // data.fill<int>("isB", flavor==JetFlavor::B);
+  // data.fill<int>("isBB", flavor==JetFlavor::BB);
+  // data.fill<int>("isLeptonicB", flavor==JetFlavor::LeptonicB);
+  // data.fill<int>("isLeptonicB_C", flavor==JetFlavor::LeptonicB_C);
+  // data.fill<int>("isC", flavor==JetFlavor::C);
+  // data.fill<int>("isUD", flavor==JetFlavor::UD);
+  // data.fill<int>("isS", flavor==JetFlavor::S);
+  // data.fill<int>("isG", flavor==JetFlavor::G);
+  // data.fill<int>("isUndefined", flavor==JetFlavor::UNDEFINED);
 
   // jet variables
   data.fill<float>("jet_pt", jet.correctedJet("Uncorrected").pt());
@@ -142,15 +144,15 @@ void JetInfoFiller::book() {
   data.add<float>("gen_pt", 0);
   data.add<float>("Delta_gen_pt", 0);
 
-  data.add<int>("isB", 0);
-  data.add<int>("isBB", 0);
-  data.add<int>("isLeptonicB", 0);
-  data.add<int>("isLeptonicB_C", 0);
-  data.add<int>("isC", 0);
-  data.add<int>("isUD", 0);
-  data.add<int>("isS", 0);
-  data.add<int>("isG", 0);
-  data.add<int>("isUndefined", 0);
+  // data.add<int>("isB", 0);
+  // data.add<int>("isBB", 0);
+  // data.add<int>("isLeptonicB", 0);
+  // data.add<int>("isLeptonicB_C", 0);
+  // data.add<int>("isC", 0);
+  // data.add<int>("isUD", 0);
+  // data.add<int>("isS", 0);
+  // data.add<int>("isG", 0);
+  // data.add<int>("isUndefined", 0);
 
   // jet variables
   data.add<float>("jet_pt", 0);

@@ -44,6 +44,8 @@ private:
   double maxPt_ = 0;
   double maxAbsEta_ = 0;
   bool isQCDSample_ = false;
+  bool sample_isWT_ = false;
+  bool sample_isWL_ = false;
   bool isTTBarSample_ = false;
   bool isTrainSample_ = false;
   bool keepAllEvents_ = false;

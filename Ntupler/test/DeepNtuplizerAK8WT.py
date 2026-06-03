@@ -206,8 +206,8 @@ process.deepntuplizer.isHerwig = 'herwig' in _inputfile.lower()
 # note: MG can be interfaced w/ either pythia or herwig
 process.deepntuplizer.isMadGraph = 'madgraph' in _inputfile.lower()
 # Polarization 
-process.deepntuplizer.sample_isWT  = 'WT' in _inputfile 
-process.deepntuplizer.sample_isWL  = 'WL' in _inputfile 
+process.deepntuplizer.sample_isWT = 'WT' in _inputfile
+process.deepntuplizer.sample_isWL = 'WL' in _inputfile
 
 process.deepntuplizer.isTrainSample = options.isTrainSample
 
