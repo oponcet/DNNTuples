@@ -1,0 +1,29 @@
+Universe              = vanilla
+Executable            = condor/run_dnntuples.sh
+
+PROCABBR = VBSWLWLBoost
+PROCNAME = VBSWLWLToJets_5f_LO_FXFX_Boost_Run3Summer23
+
+EOSPATH = root://cmseos.fnal.gov//store/user/oponcet/dnntuples/$(PROCNAME)/dnnTuples_$(Cluster)-$(Process).root
+
+
+WORKAREA = local
+
+Arguments = $(WORKAREA) $(Infiles) isTrainSample=0 addLowLevel=0 $(EOSPATH)
+
+request_cpus   = 1
+request_memory = 4000
+
+use_x509userproxy = true
+
++JobFlavour = "tomorrow"
+
+Log    = log/job.log.$(Cluster)
+Output = log/job.out.$(Cluster)-$(Process)
+Error  = log/job.err.$(Cluster)-$(Process)
+
+should_transfer_files   = YES
+when_to_transfer_output = ON_EXIT
+transfer_input_files    = $(Infiles)
+
+Queue Infiles from samples/test1.txt
