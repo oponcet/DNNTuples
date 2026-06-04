@@ -229,3 +229,203 @@ DeepNTuples/
 |       |-- DeepNtuplizerAK8Scout.py
 |       `-- output_numEvent100.root
 `-- README.md
+
+
+# DeepNTuples for VBS W Polarization
+
+This repository is a fork of the original DNNTuples framework developed by Colizzi et al. and based on the `dev-haa-nanov15` branch.
+
+The framework has been adapted for studies of Vector Boson Scattering (VBS) with a focus on hadronically decaying boosted W bosons and polarization classification.
+
+Current development targets:
+
+* CMSSW_15_0_10
+* Run 3 MiniAOD samples
+* LPC EL9 environment
+* W longitudinal (WL) vs transverse (WT) polarization studies
+* Deep-learning ntuple production for AK8 jets
+
+## Environment Setup
+
+```bash
+cd /uscms_data/d3/oponcet1/VBS/
+
+source /cvmfs/cms.cern.ch/cmsset_default.sh
+
+cmsrel CMSSW_15_0_10
+cd CMSSW_15_0_10/src
+
+cmsenv
+```
+
+Clone the repository:
+
+```bash
+git clone git@github.com:oponcet/DNNTuples.git DeepNTuples
+cd DeepNTuples
+```
+
+Build:
+
+```bash
+scram b -j8
+```
+
+---
+
+## Local Production
+
+Move to the ntuplizer directory:
+
+```bash
+cd $CMSSW_BASE/src/DeepNTuples/Ntupler/test
+```
+
+Run on a single MiniAOD file:
+
+### WT samples
+
+```bash
+cmsRun DeepNtuplizerAK8WT.py \
+    maxEvents=100 \
+    isTrainSample=1
+```
+
+### WL samples
+
+```bash
+cmsRun DeepNtuplizerAK8WL.py \
+    maxEvents=100 \
+    isTrainSample=1
+```
+
+Output:
+
+```text
+output_WT.root
+output_WL.root
+```
+
+---
+
+## LPC Condor Production
+
+Jobs are submitted through HTCondor on LPC.
+
+### Submit WT jobs
+
+```bash
+condor_submit condor/submit_wT.jdl
+```
+
+### Submit WL jobs
+
+```bash
+condor_submit condor/submit_wL.jdl
+```
+
+The worker node:
+
+1. Creates a fresh CMSSW_15_0_10 area.
+2. Clones the repository.
+3. Builds DeepNTuples.
+4. Runs the corresponding cmsRun configuration.
+5. Copies the output ROOT file to EOS.
+
+---
+
+## W Polarization Extensions
+
+The ntuplizer has been extended with dedicated W-polarization information.
+
+### Sample Flags
+
+Additional configuration flags:
+
+```cpp
+bool sample_isWT_ = false;
+bool sample_isWL_ = false;
+```
+
+These flags identify the generated polarization state of the signal sample.
+
+---
+
+### Polarization Observable: p_theta
+
+The variable
+
+[
+p_{\theta}=\frac{|E_1-E_2|}{|\vec{p}_W|}
+]
+
+is computed from the two leading W subjets.
+
+Implementation:
+
+```cpp
+float dE = std::abs(sj1->energy() - sj2->energy());
+float pW_mag = jet.p();
+
+float ptheta = (pW_mag > 0) ? dE / pW_mag : 0.0;
+
+data.fill<float>("fj_ptheta", ptheta);
+```
+
+This observable is sensitive to the W helicity through the energy asymmetry of the two decay products.
+
+---
+
+### Polarization Observable: z_j
+
+The variable
+
+[
+z_j=\frac{\max(p_{T,1},p_{T,2})}{p_{T,W}}
+]
+
+measures the momentum sharing between the two reconstructed subjets.
+
+Implementation:
+
+```cpp
+float pt1 = sj1->pt();
+float pt2 = sj2->pt();
+
+float leading_pt = std::max(pt1, pt2);
+float pTW = jet.pt();
+
+float zj = (pTW > 0) ? leading_pt / pTW : 0.0;
+
+data.fill<float>("fj_zj", zj);
+```
+
+This variable is expected to carry information about the polarization state of the parent W boson.
+
+---
+
+## Ntuple Content
+
+The output ROOT tree contains:
+
+* AK8 jet kinematics
+* Jet mass and substructure observables
+* Deep-learning tagger inputs
+* Particle-flow candidate information
+* Secondary vertex information
+* Generator-level matching
+* W-polarization labels
+* Polarization-sensitive observables:
+
+  * `fj_ptheta`
+  * `fj_zj`
+
+---
+
+## Typical Workflow
+
+1. Produce MiniAOD signal samples.
+2. Run DeepNtuplizerAK8WT.py or DeepNtuplizerAK8WL.py.
+3. Merge output ROOT files.
+4. Train WL vs WT classifiers.
+5. Evaluate polarization-sensitive observables and ML performance.

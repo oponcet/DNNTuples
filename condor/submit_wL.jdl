@@ -1,8 +1,8 @@
 Universe              = vanilla
 Executable            = condor/run_dnntuples.sh
 
-PROCABBR = VBSWTWTBoost
-PROCNAME = VBSWTWTToJets_5f_LO_FXFX_Boost_Run3Summer23
+PROCABBR = VBSWLWLBoost
+PROCNAME = VBSWLWLToJets_5f_LO_FXFX_Boost_Run3Summer23
 
 EOSPATH = root://cmseos.fnal.gov//store/user/oponcet/dnntuples/$(PROCNAME)/dnnTuples_$(Cluster)-$(PROCABBR).root
 
@@ -25,4 +25,4 @@ should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
 transfer_input_files    = $(Infiles)
 
-Queue Infiles from samples/VBSWTWTBoost_filelist.txt
+Queue Infiles from samples/VBSWLWLBoost_filelist.txt
