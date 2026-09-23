@@ -2,11 +2,13 @@
 
 WORKAREA=$1
 INPUTFILES=$2
-CMSRUNARGS=$3
-EOSPATH=$4
+TRAINARG=$3
+LOWLVLARG=$4
+EOSPATH=$5
 BRANCHNAME="Wpol_tagger"
-TAGGER=$5
+TAGGER=$6
 
+CMSRUNARGS="${TRAINARG} ${LOWLVLARG}"
 
 WORKDIR=$(pwd)
 
@@ -79,13 +81,13 @@ for infile in "${FILES[@]}"; do
     ${CMSSWVER}/src/DeepNTuples/Ntupler/test/${CFG} \
     inputFiles="file:${INPUTLOCAL}" \
     ${CMSRUNARGS} \
-    2>&1 | tee log/cmsRun_${idx}.log
+    2>&1 | tee cmsRun_${TAGGER}_${idx}.log
 
     CMS_STATUS=${PIPESTATUS[0]}
 
     if [ ${CMS_STATUS} -ne 0 ]; then
         echo "cmsRun failed on ${INPUTLOCAL}"
-        tail -100 cmsRun_${idx}.log
+        tail -100 cmsRun_${TAGGER}_${idx}.log
         exit ${CMS_STATUS}
     fi
 
@@ -94,7 +96,7 @@ for infile in "${FILES[@]}"; do
     exit 101
     fi
 
-    mv "${OUTFILE}" dnntuple_raw_${idx}.root
+    mv "${OUTFILE}" dnntuple_raw_${TAGGER}_${idx}.root
 
     idx=$((idx+1))
 
@@ -104,28 +106,28 @@ done
 # MERGE
 ########################################
 
-echo "Merging outputs..."
+# echo "Merging outputs..."
 
-if [ ${#outputs[@]} -eq 1 ]; then
-    mv "${outputs[0]}" dnntuple.root
-else
-    hadd -fk dnntuple.root "${outputs[@]}"
-fi
+# if [ ${#outputs[@]} -eq 1 ]; then
+#     mv "${outputs[0]}" dnntuple.root
+# else
+#     hadd -fk dnntuple.root "${outputs[@]}"
+# fi
 
 ########################################
 # EOS OUTPUT (with minimal robustness)
 ########################################
 
-if [ -n "${EOSPATH}" ]; then
-    echo "Copying to EOS: ${EOSPATH}"
+# if [ -n "${EOSPATH}" ]; then
+#     echo "Copying to EOS: ${EOSPATH}"
 
-    xrdcp -f dnntuple.root "${EOSPATH}"
-    XRDCODE=$?
+#     xrdcp -f dnntuple.root "${EOSPATH}"
+#     XRDCODE=$?
 
-    if [ ${XRDCODE} -ne 0 ]; then
-        echo "ERROR xrdcp failed"
-        exit ${XRDCODE}
-    fi
-fi
+#     if [ ${XRDCODE} -ne 0 ]; then
+#         echo "ERROR xrdcp failed"
+#         exit ${XRDCODE}
+#     fi
+# fi
 
 echo "DONE"

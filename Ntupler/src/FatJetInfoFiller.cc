@@ -36,15 +36,13 @@ void FatJetInfoFiller::readEvent(const edm::Event& iEvent, const edm::EventSetup
 
 void FatJetInfoFiller::book() {
   // truth labels
-  // data.add<int>("fj_isTop", 0);
+  data.add<int>("fj_isTop", 0);
   data.add<int>("fj_isW", 0);
-  // data.add<int>("fj_isZ", 0);
-  // data.add<int>("fj_isH2p", 0);
-  // data.add<int>("fj_isHWW", 0);
-  // data.add<int>("fj_isHZZ", 0);
-  // data.add<int>("fj_isQCD", 0);
-  // data.add<int>("fj_isWT", 0);
-  // data.add<int>("fj_isWL", 0);
+  data.add<int>("fj_isZ", 0);
+  data.add<int>("fj_isH2p", 0);
+  data.add<int>("fj_isHWW", 0);
+  data.add<int>("fj_isHZZ", 0);
+  data.add<int>("fj_isQCD", 0);
 
   data.add<int>("fj_label", 0);
   if (labels_.empty()) {
@@ -247,7 +245,12 @@ void FatJetInfoFiller::book() {
 bool FatJetInfoFiller::fill(const pat::Jet& jet, size_t jetidx, const JetHelper& jet_helper) {
 
   // ----------------------------------------------------------------
-  fjmatch_.flavorLabel(&jet, *genParticlesHandle, jetR_, isMDTagger_);
+  try {
+    fjmatch_.flavorLabel(&jet, *genParticlesHandle, jetR_, isMDTagger_);
+  } catch (const std::runtime_error& e) {
+    // unsupported gen topology (e.g. H -> 3/4 objects): skip this jet instead of aborting the job
+    return false;
+  }
   std::string fjlabel = fjmatch_.getResult().label;
   auto& resparts = fjmatch_.getResult().resParticles;
   auto& parts = fjmatch_.getResult().particles;
@@ -289,15 +292,13 @@ bool FatJetInfoFiller::fill(const pat::Jet& jet, size_t jetidx, const JetHelper&
     }
   }
 
-  // data.fill<int>("fj_isTop", fjlabel.rfind("Top_", 0) == 0);
+  data.fill<int>("fj_isTop", fjlabel.rfind("Top_", 0) == 0);
   data.fill<int>("fj_isW",   fjlabel.rfind("W_", 0) == 0);
-  // data.fill<int>("fj_isZ",   fjlabel.rfind("Z_", 0) == 0);
-  // data.fill<int>("fj_isH2p", fjlabel.rfind("H_", 0) == 0 && !fjlabel.rfind("H_WW_", 0) == 0 && !fjlabel.rfind("H_WxWx_", 0) == 0 && !fjlabel.rfind("H_WxWxStar_", 0) == 0 && !fjlabel.rfind("H_ZZ_", 0) == 0 && !fjlabel.rfind("H_ZxZx_", 0) == 0 && !fjlabel.rfind("H_ZxZxStar_", 0) == 0);
-  // data.fill<int>("fj_isHWW", fjlabel.rfind("H_WW_", 0) == 0 || fjlabel.rfind("H_WxWx_", 0) == 0 || fjlabel.rfind("H_WxWxStar_", 0) == 0);
-  // data.fill<int>("fj_isHZZ", fjlabel.rfind("H_ZZ_", 0) == 0 || fjlabel.rfind("H_ZxZx_", 0) == 0 || fjlabel.rfind("H_ZxZxStar_", 0) == 0);
-  // data.fill<int>("fj_isQCD", fjlabel.rfind("QCD_", 0) == 0);
-  // data.fill<int>("fj_isWL",   fjlabel.rfind("WL_", 0) == 0);
-  // data.fill<int>("fj_isWT",   fjlabel.rfind("WT_", 0) == 0);
+  data.fill<int>("fj_isZ",   fjlabel.rfind("Z_", 0) == 0);
+  data.fill<int>("fj_isH2p", fjlabel.rfind("H_", 0) == 0 && !fjlabel.rfind("H_WW_", 0) == 0 && !fjlabel.rfind("H_WxWx_", 0) == 0 && !fjlabel.rfind("H_WxWxStar_", 0) == 0 && !fjlabel.rfind("H_ZZ_", 0) == 0 && !fjlabel.rfind("H_ZxZx_", 0) == 0 && !fjlabel.rfind("H_ZxZxStar_", 0) == 0);
+  data.fill<int>("fj_isHWW", fjlabel.rfind("H_WW_", 0) == 0 || fjlabel.rfind("H_WxWx_", 0) == 0 || fjlabel.rfind("H_WxWxStar_", 0) == 0);
+  data.fill<int>("fj_isHZZ", fjlabel.rfind("H_ZZ_", 0) == 0 || fjlabel.rfind("H_ZxZx_", 0) == 0 || fjlabel.rfind("H_ZxZxStar_", 0) == 0);
+  data.fill<int>("fj_isQCD", fjlabel.rfind("QCD_", 0) == 0);
 
   // find the label index
   int label_index = -1;
@@ -335,6 +336,7 @@ bool FatJetInfoFiller::fill(const pat::Jet& jet, size_t jetidx, const JetHelper&
   data.fill<float>("fj_gen_phi", resparts_size > 0 ? resparts[0]->phi() : -999);
   data.fill<float>("fj_gen_mass", resparts_size > 0 ? resparts[0]->mass() : 0);
   data.fill<float>("fj_gen_pid", resparts_size > 0 ? resparts[0]->pdgId() : 0);
+  data.fill<float>("fj_gen_deltaR", resparts_size > 0 ? reco::deltaR(jet, resparts[0]->p4()) : 999);
   data.fill<float>("fj_gendau1_pt", resparts_size > 1 ? resparts[1]->pt() : -999);
   data.fill<float>("fj_gendau1_eta", resparts_size > 1 ? resparts[1]->eta() : -999);
   data.fill<float>("fj_gendau1_phi", resparts_size > 1 ? resparts[1]->phi() : -999);
@@ -420,24 +422,15 @@ bool FatJetInfoFiller::fill(const pat::Jet& jet, size_t jetidx, const JetHelper&
       data.fill<float>("fj_sdsj2_phi", sj2->phi());
       data.fill<float>("fj_sdsj2_mass", sj2->mass());
       data.fill<float>("fj_sdsj2_csv", sj2->bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
-      // -------------------------
-      // p_theta
+
+      // p_theta = |E1-E2| / |p_jet|
       float dE = std::abs(sj1->energy() - sj2->energy());
-      float pW_mag = jet.p();   // |p_jet| ~ |p_W|
-
-      float ptheta = (pW_mag > 0) ? dE / pW_mag : 0.0;
-
-      data.fill<float>("fj_ptheta", ptheta);
-      // -------------------------
-      // z_j
-      float pt1 = sj1->pt();
-      float pt2 = sj2->pt();
-
-      float leading_pt = std::max(pt1, pt2);
+      float pW_mag = jet.p();
+      data.fill<float>("fj_ptheta", (pW_mag > 0) ? dE / pW_mag : 0.0);
+      // z_j = leading subjet pT / jet pT
+      float leading_pt = std::max(sj1->pt(), sj2->pt());
       float pTW = jet.pt();
-
-      float zj = (pTW > 0) ? leading_pt / pTW : 0.0;
-      data.fill<float>("fj_zj", zj);
+      data.fill<float>("fj_zj", (pTW > 0) ? leading_pt / pTW : 0.0);
 
       // some variables used in a baseline tagger
       float deltaR = reco::deltaR(*sj1, *sj2);

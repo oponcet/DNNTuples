@@ -8,7 +8,9 @@ EOSPATH = root://cmseos.fnal.gov//store/user/oponcet/dnntuples/$(PROCNAME)/dnnTu
 
 WORKAREA = local
 
-Arguments = $(WORKAREA) $(Infiles) isTrainSample=0 addLowLevel=0 $(EOSPATH) WT
+CMSRUNARGS = isTrainSample=0 addLowLevel=1
+
+Arguments = $(WORKAREA) $(Infiles) $(CMSRUNARGS) $(EOSPATH) WT
 
 request_cpus   = 1
 request_memory = 4000
